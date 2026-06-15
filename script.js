@@ -118,6 +118,7 @@
   let gameRunning = false;
   let tapEnabled = false;
   let readyTimer = 0;
+  let moreMode = false;
 
 
   const AUDIO_VOLUME = {
@@ -322,6 +323,11 @@
     screen.classList.add('is-active');
   }
 
+  function setMoreMode(isActive) {
+    moreMode = Boolean(isActive);
+    els.gameScreen.classList.toggle('is-more-mode', moreMode);
+  }
+
   function updateTitle() {
     const attempt = getAttempt();
     els.attemptLabel.textContent = `挑戦：${attempt}回目`;
@@ -343,6 +349,7 @@
     tapCount = 0;
     gameRunning = false;
     tapEnabled = false;
+    setMoreMode(false);
     updateTitle();
     showScreen(els.titleScreen);
   }
@@ -358,6 +365,7 @@
     clearTimeout(readyTimer);
     stopJingles();
     resetCheerSe();
+    setMoreMode(false);
     primeBgmForAttempt(getAttempt());
 
     els.timeText.textContent = GAME_SECONDS.toFixed(1);
@@ -448,24 +456,35 @@
   }
 
   function addScore(add, judge) {
+    const attempt = getAttempt();
+
     score = Math.min(currentConfig.cap, score + add);
+    const isFourthAttemptMore = attempt >= 4 && score >= CLEAR_POINT;
+    const shownJudge = isFourthAttemptMore ? 'MORE!!' : judge;
+
     els.scoreText.textContent = String(score);
     els.progressBar.style.width = `${Math.min(100, (score / CLEAR_POINT) * 100)}%`;
-    els.judgeText.textContent = `${judge} +${add}`;
+    els.judgeText.textContent = `${shownJudge} +${add}`;
 
-    if (judge === 'PERFECT' || judge === 'GOOD') {
+    if (isFourthAttemptMore) {
+      setMoreMode(true);
+      playCheerSe();
+      els.flavorText.textContent = '風太が立ったぞォーッ!!';
+    } else if (judge === 'PERFECT' || judge === 'GOOD') {
       playCheerSe();
     }
 
-    if (judge === 'PERFECT') {
-      els.flavorText.textContent = '完璧と言える。';
+    if (isFourthAttemptMore) {
+      // 4回目は150ポイントを超えても、10秒のBGMを最後まで聴けるようゲームを続ける。
+    } else if (judge === 'PERFECT') {
+      els.flavorText.textContent = '完璧だ！';
     } else if (judge === 'GOOD') {
-      els.flavorText.textContent = 'いい感じだ。';
+      els.flavorText.textContent = 'いい感じ。';
     } else {
       els.flavorText.textContent = currentConfig.miss > 0 ? 'ズレた。でも応援は届いた。' : '虚空をタップした。';
     }
 
-    if (score >= CLEAR_POINT) {
+    if (score >= CLEAR_POINT && attempt < 4) {
       endGame(true);
     }
   }
@@ -491,7 +510,7 @@
     if (forceClear || score >= CLEAR_POINT) {
       state.cleared = true;
       saveState();
-      drawFuta(els.clearCanvas, CLEAR_POINT, 'clear');
+      drawFuta(els.clearCanvas, Math.max(score, CLEAR_POINT), 'clear', performance.now());
       playSuccessJingle();
       showScreen(els.clearScreen);
       return;
@@ -550,6 +569,7 @@
   function backToTitle() {
     stopAllBgm();
     stopJingles();
+    setMoreMode(false);
     updateTitle();
     showScreen(els.titleScreen);
   }
@@ -559,19 +579,27 @@
     const w = canvas.width;
     const h = canvas.height;
     const p = Math.max(0, Math.min(1, point / CLEAR_POINT));
+    const isMore = point >= CLEAR_POINT && (mode === 'game' || mode === 'clear');
 
     ctx.clearRect(0, 0, w, h);
     ctx.imageSmoothingEnabled = false;
 
-    rect(ctx, 0, 0, w, h, '#83c9ef');
-    rect(ctx, 0, 88, w, 32, '#67b95b');
-    rect(ctx, 0, 100, w, 20, '#3e8639');
+    rect(ctx, 0, 0, w, h, isMore ? '#ffd15c' : '#83c9ef');
+    if (isMore) {
+      drawMoreEffects(ctx, time);
+    }
+    rect(ctx, 0, 88, w, 32, isMore ? '#86d96e' : '#67b95b');
+    rect(ctx, 0, 100, w, 20, isMore ? '#2f9c46' : '#3e8639');
 
     // うっすら観客
     for (let i = 0; i < 9; i += 1) {
       const x = 9 + i * 17;
       rect(ctx, x, 76 + (i % 2) * 2, 6, 7, '#fff3d7');
       rect(ctx, x + 1, 72 + (i % 3), 4, 4, '#2a1712');
+      if (isMore) {
+        rect(ctx, x - 2, 70 + (i % 2), 3, 8, '#fff3d7');
+        rect(ctx, x + 6, 69 + (i % 3), 3, 8, '#fff3d7');
+      }
     }
 
     if (mode === 'clear') {
@@ -580,7 +608,7 @@
 
     const bodyX = 76;
     const groundY = 90;
-    const stand = mode === 'clear' ? 1 : p;
+    const stand = isMore || mode === 'clear' ? 1 : p;
     const crouch = 1 - stand;
     const bodyY = groundY - 18 - Math.round(29 * stand);
     const bodyH = 24 + Math.round(22 * stand);
@@ -588,10 +616,10 @@
     const tailLift = Math.round(14 * stand);
 
     // しっぽ
-    rect(ctx, bodyX - 50, bodyY + 22 - tailLift, 14, 10, '#8e3d22');
-    rect(ctx, bodyX - 62, bodyY + 18 - tailLift, 14, 10, '#d86b30');
-    rect(ctx, bodyX - 74, bodyY + 14 - tailLift, 14, 10, '#8e3d22');
-    rect(ctx, bodyX - 85, bodyY + 11 - tailLift, 13, 9, '#f08a42');
+    rect(ctx, bodyX - 26, bodyY + 22 - tailLift, 14, 10, '#8e3d22');
+    rect(ctx, bodyX - 38, bodyY + 18 - tailLift, 14, 10, '#d86b30');
+    rect(ctx, bodyX - 50, bodyY + 14 - tailLift, 14, 10, '#8e3d22');
+    rect(ctx, bodyX - 61, bodyY + 11 - tailLift, 13, 9, '#f08a42');
 
     // 足
     rect(ctx, bodyX - 8, groundY - 5, 14, 7, '#2a1712');
@@ -620,8 +648,8 @@
     // 顔
     rect(ctx, bodyX - 10, headY + 9, 12, 11, '#fff3d7');
     rect(ctx, bodyX + 10, headY + 9, 12, 11, '#fff3d7');
-    rect(ctx, bodyX - 9, headY + 11, 6, 6, '#2a1712');
-    rect(ctx, bodyX + 15, headY + 11, 6, 6, '#2a1712');
+    rect(ctx, bodyX - 6, headY + 11, 5, 6, '#2a1712');
+    rect(ctx, bodyX + 11, headY + 11, 5, 6, '#2a1712');
     rect(ctx, bodyX + 3, headY + 18, 7, 5, '#2a1712');
     rect(ctx, bodyX + 1, headY + 24, 11, 3, '#fff3d7');
 
@@ -634,10 +662,10 @@
       rect(ctx, 43, 26, 10, 10, '#ffd15c');
       rect(ctx, 106, 21, 10, 10, '#ffd15c');
       rect(ctx, 121, 43, 8, 8, '#fff3d7');
-      pixelText(ctx, 'TATTA!', 57, 12, '#fff3d7');
+      pixelText(ctx, isMore ? 'MORE!' : 'TATTA!', 57, 12, isMore ? '#2a1712' : '#fff3d7');
     } else if (mode === 'game') {
-      const words = point > 80 ? 'MO SUKOSHI' : point > 40 ? 'YOI SHO' : 'FUTA';
-      pixelText(ctx, words, 8, 10, '#fff3d7');
+      const words = isMore ? 'MORE!' : point > 80 ? 'MO SUKOSHI' : point > 40 ? 'YOI SHO' : 'FUTA';
+      pixelText(ctx, words, 8, 10, isMore ? '#2a1712' : '#fff3d7');
     } else {
       pixelText(ctx, 'FUTA', 11, 10, '#fff3d7');
     }
@@ -653,6 +681,20 @@
       rect(ctx, x + 3, y, 3, 9, color);
       rect(ctx, x + 6, y + 3, 3, 3, color);
     });
+  }
+
+  function drawMoreEffects(ctx, time = 0) {
+    const colors = ['#fff3d7', '#e45a2c', '#2a1712', '#96e879'];
+    for (let i = 0; i < 18; i += 1) {
+      const x = (i * 23 + Math.floor(time / 80)) % 160;
+      const y = 8 + ((i * 17 + Math.floor(time / 120)) % 66);
+      rect(ctx, x, y, 4, 4, colors[i % colors.length]);
+    }
+
+    rect(ctx, 5, 54, 18, 5, '#e45a2c');
+    rect(ctx, 137, 54, 18, 5, '#e45a2c');
+    rect(ctx, 9, 47, 10, 4, '#fff3d7');
+    rect(ctx, 141, 47, 10, 4, '#fff3d7');
   }
 
   function rect(ctx, x, y, w, h, color) {

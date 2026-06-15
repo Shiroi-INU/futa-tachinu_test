@@ -464,3 +464,72 @@ button:disabled {
 .game-screen .tap-button {
   margin-top: 2px;
 }
+
+
+/* 4回目：150ポイント到達後のMOREモード */
+.game-screen.is-more-mode .game-header > div {
+  background: var(--gold);
+  animation: morePulse .45s steps(2, end) infinite;
+}
+
+.game-screen.is-more-mode #scoreText {
+  color: var(--accent);
+  text-shadow: 2px 2px 0 #fff7e8, 4px 4px 0 var(--ink);
+}
+
+.game-screen.is-more-mode .progress-wrap {
+  background: #fff7e8;
+  box-shadow: 0 5px 0 var(--ink), 0 0 18px var(--gold);
+}
+
+.game-screen.is-more-mode .progress-bar {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--gold) 0 10px,
+    #fff7e8 10px 20px,
+    var(--accent) 20px 30px,
+    #96e879 30px 40px
+  );
+  animation: moreStripe .35s linear infinite;
+}
+
+.game-screen.is-more-mode .judge-text {
+  color: #fff7e8;
+  font-size: 30px;
+  text-shadow: 0 3px 0 var(--accent-dark), 0 0 14px var(--gold);
+  animation: moreBounce .35s steps(2, end) infinite;
+}
+
+.game-screen.is-more-mode .tap-button {
+  background: var(--gold);
+  color: var(--ink);
+  text-shadow: none;
+  box-shadow: 0 7px 0 var(--ink), 0 0 18px var(--gold);
+}
+
+@keyframes morePulse {
+  0% {
+    transform: rotate(-1deg);
+  }
+  100% {
+    transform: rotate(1deg);
+  }
+}
+
+@keyframes moreStripe {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 40px 0;
+  }
+}
+
+@keyframes moreBounce {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    transform: translateY(-2px) scale(1.06);
+  }
+}
