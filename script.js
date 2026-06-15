@@ -103,6 +103,7 @@
     gameCanvas: document.getElementById('gameCanvas'),
     failCanvas: document.getElementById('failCanvas'),
     clearCanvas: document.getElementById('clearCanvas'),
+    clearScoreText: document.getElementById('clearScoreText'),
     shareXButton: document.getElementById('share-x-button')
   };
 
@@ -510,6 +511,9 @@
     if (forceClear || score >= CLEAR_POINT) {
       state.cleared = true;
       saveState();
+      if (els.clearScoreText) {
+        els.clearScoreText.textContent = `4ゲーム目スコア：${Math.max(score, CLEAR_POINT)} POINT`;
+      }
       drawFuta(els.clearCanvas, Math.max(score, CLEAR_POINT), 'clear', performance.now());
       playSuccessJingle();
       showScreen(els.clearScreen);
