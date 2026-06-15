@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#2b1d18" />
+  <title>風太、立ちぬ</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main id="app" class="app" aria-live="polite">
+    <section id="titleScreen" class="screen is-active title-screen">
+      <div class="badge">非公式10秒ミニゲーム</div>
+      <h1>風太、立ちぬ</h1>
+      <p class="lead">レッサーパンダの風太は、もう人間でいう100歳。<br>足腰はすっかり弱ってきたけど…<br>また、みんなのために立ち上がりたいんだ。</p>
+      <canvas id="titleCanvas" class="pixel-canvas" width="160" height="120" aria-label="ドット絵のレッサーパンダ"></canvas>
+
+      <div class="status-card">
+        <p id="attemptLabel">挑戦：1回目</p>
+        <p id="itemLabel">持ち物：なし</p>
+      </div>
+
+      <button id="startButton" class="primary-button">立ち上がる</button>
+      <button id="resetButton" class="sub-button">最初から遊ぶ</button>
+      <p class="tiny-note">バーが中央の応援ラインに重なった瞬間にタップ！</p>
+    </section>
+
+    <section id="gameScreen" class="screen game-screen">
+      <canvas id="gameCanvas" class="pixel-canvas stage-canvas" width="160" height="120" aria-label="立ち上がろうとする風太のドット絵"></canvas>
+
+      <div class="meter" aria-label="タイミングゲージ">
+        <div class="meter-track">
+          <div class="good-zone"></div>
+          <div class="perfect-zone"></div>
+          <div class="cheer-line"></div>
+          <div id="movingBar" class="moving-bar"></div>
+        </div>
+        <p class="meter-caption">中央の<span>応援ライン</span>でタップ</p>
+      </div>
+
+      <header class="game-header">
+        <div>
+          <span class="label">TIME</span>
+          <strong id="timeText">15.0</strong>
+        </div>
+        <div>
+          <span class="label">POINT</span>
+          <strong id="scoreText">0</strong>
+        </div>
+      </header>
+
+      <div class="progress-wrap" aria-label="立ち上がりポイント">
+        <div id="progressBar" class="progress-bar"></div>
+      </div>
+
+      <button id="tapButton" class="tap-button">タップで応援</button>
+      <div id="judgeText" class="judge-text">READY?</div>
+      <p id="flavorText" class="flavor-text">風太、いきます！</p>
+    </section>
+
+    <section id="failScreen" class="screen result-screen">
+      <div class="badge bad">失敗</div>
+      <h2>立てなかった。</h2>
+      <canvas id="failCanvas" class="pixel-canvas" width="160" height="120" aria-label="しょんぼりする風太のドット絵"></canvas>
+      <p id="failText" class="result-copy">でも、何かを得た気がする。</p>
+      <button id="itemButton" class="primary-button">落ちていたものを見る</button>
+      <button id="backTitleButton" class="sub-button hidden">タイトルへ</button>
+    </section>
+
+    <section id="itemScreen" class="screen item-screen">
+      <div class="badge">アイテム獲得</div>
+      <h2 id="itemName">新聞記事</h2>
+      <div id="itemIcon" class="item-icon" aria-hidden="true">📰</div>
+      <p id="itemCopy" class="result-copy">かつて立った日の記事。だいぶ黄ばんでいる。</p>
+      <button id="nextButton" class="primary-button">次の挑戦へ</button>
+    </section>
+
+    <section id="clearScreen" class="screen clear-screen">
+      <div class="badge good">CLEAR</div>
+      <h2>風太、立ちぬ！</h2>
+      <canvas id="clearCanvas" class="pixel-canvas" width="160" height="120" aria-label="立ち上がった風太のドット絵"></canvas>
+      <p class="result-copy">かつて、日本中を盛り上げてくれた風太。<br>みんな今でも大好きなんだ。<br>風太の23歳の誕生日を、7月5日にお祝いしよう。</p>
+      <div class="link-buttons">
+        <button class="link-button" id="share-x-button">風太 & 飼育員を応援する（X）</button>
+        <a class="link-button" href="https://talent-dictionary.com/s/age/23" target="_blank" rel="noopener">風太と同い年の有名人</a>
+        <a class="link-button" href="https://x.com/FUTA_on_solana" target="_blank" rel="noopener">$FUTA のファンページへ</a>
+      </div>
+      <p class="result-copy">※「風太、立ちぬ」は非公式のジョークゲームです。<br>動物園では、あくまで静かに見守ろう！<br>立っても立たなくても、風太は風太なのだ。</p>
+      <button id="clearResetButton" class="primary-button">何度でも、立ちぬ</button>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
