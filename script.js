@@ -168,6 +168,10 @@
     audioCandidates('decision.mp3', 'SE_決定ボタン.mp3'),
     AUDIO_VOLUME.decision
   );
+  const itemSe = createAudio(
+    audioCandidates('item.mp3'),
+    AUDIO_VOLUME.decision
+  );
   const failJingle = createAudio(
     audioCandidates('fail-jingle.mp3', 'SE_失敗時ジングル.mp3'),
     AUDIO_VOLUME.jingle
@@ -698,7 +702,7 @@
   els.gameCanvas.addEventListener('pointerdown', handleTap);
   document.querySelector('.meter').addEventListener('pointerdown', handleTap);
   els.itemButton.addEventListener('click', () => {
-    playDecisionSe();
+    playAudio(itemSe);
     showItem();
   });
   els.nextButton.addEventListener('click', () => {
